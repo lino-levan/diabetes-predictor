@@ -9,7 +9,7 @@ learning_rate = 1e-4
 batch_size = 64
 epochs = 10
 
-test = DiabetesDataset("data/train.csv")
+test = DiabetesDataset("data/test.csv")
 test_dataloader = DataLoader(test, batch_size=batch_size)
 train = DiabetesDataset("data/train.csv")
 train_dataloader = DataLoader(train, batch_size=batch_size)
