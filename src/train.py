@@ -4,15 +4,20 @@ from torch import nn
 from torch.utils.data import DataLoader
 from dataset import DiabetesDataset
 from neural_network import NeuralNetwork
+from sklearn.preprocessing import StandardScaler
 
 learning_rate = 1e-4
 batch_size = 64
 epochs = 100
 
-test = DiabetesDataset("data/test.csv")
-test_dataloader = DataLoader(test, batch_size=batch_size)
-train = DiabetesDataset("data/train.csv")
+# Create scaler and fit on training data
+scaler = StandardScaler()
+train = DiabetesDataset("data/train.csv", scaler=scaler, fit_scaler=True)
 train_dataloader = DataLoader(train, batch_size=batch_size)
+
+# Use same scaler for test data (no fitting)
+test = DiabetesDataset("data/test.csv", scaler=scaler, fit_scaler=False)
+test_dataloader = DataLoader(test, batch_size=batch_size)
 
 device = torch.accelerator.current_accelerator().type if torch.accelerator.is_available() else "cpu"
 print("Using", device)
