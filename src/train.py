@@ -1,14 +1,10 @@
 import math
 import torch
-from torch import nn
 from torch.utils.data import DataLoader
+from sklearn.preprocessing import StandardScaler
 from dataset import DiabetesDataset
 from neural_network import NeuralNetwork
-from sklearn.preprocessing import StandardScaler
-
-learning_rate = 1e-4
-batch_size = 64
-epochs = 100
+from const import learning_rate, batch_size, epochs, loss_fn
 
 # Create scaler and fit on training data
 scaler = StandardScaler()
@@ -19,9 +15,6 @@ train_dataloader = DataLoader(train, batch_size=batch_size)
 test = DiabetesDataset("data/test.csv", scaler=scaler, fit_scaler=False)
 test_dataloader = DataLoader(test, batch_size=batch_size)
 
-device = torch.accelerator.current_accelerator().type if torch.accelerator.is_available() else "cpu"
-print("Using", device)
-
 model = NeuralNetwork()
 print(model.parameters())
 
@@ -30,7 +23,6 @@ print(train[0]["label"])
 print(example_feature)
 print(model(example_feature))
 
-loss_fn = nn.BCEWithLogitsLoss()
 optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate)
 
 def train_loop(dataloader):
@@ -38,9 +30,12 @@ def train_loop(dataloader):
     size = len(dataloader.dataset)
 
     for batch, result in enumerate(dataloader):
+        features = result["features"]
+        labels = result["label"]
+
         # First get prediction and loss
-        pred = model(result["features"])
-        loss = loss_fn(pred, result["label"])
+        pred = model(features)
+        loss = loss_fn(pred, labels)
 
         # Now do the backprop
         loss.backward()
@@ -58,11 +53,14 @@ def test_loop(dataloader):
 
     with torch.no_grad(): # disables gradient tracking for perf improvement
         for result in dataloader:
-            pred = model(result["features"])
-            test_loss += loss_fn(pred, result["label"]).item()
+            features = result["features"]
+            labels = result["label"]
+
+            pred = model(features)
+            test_loss += loss_fn(pred, labels).item()
 
             pred_flat = pred.squeeze()
-            label_flat = result["label"].squeeze()
+            label_flat = labels.squeeze()
             pred_classes = (torch.sigmoid(pred_flat) >= 0.5).float()
             correct += (pred_classes == label_flat).sum().item()
 
@@ -75,3 +73,5 @@ for epoch in range(epochs):
     print(f"Epoch {epoch+1}\n-------------------------------")
     train_loop(train_dataloader)
     test_loop(test_dataloader)
+
+torch.save(model.state_dict(), "model_weights.pth")
