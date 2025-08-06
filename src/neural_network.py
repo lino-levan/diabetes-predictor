@@ -4,17 +4,13 @@ class NeuralNetwork(nn.Module):
     def __init__(self):
         super().__init__()
         self.model = nn.Sequential(
-            nn.Linear(21, 64),
+            nn.Linear(21, 128),
             nn.ReLU(),
-            nn.Linear(64, 64),
+            nn.Dropout(0.2),
+            nn.Linear(128, 64),
             nn.ReLU(),
-            nn.Linear(64, 64),
-            nn.ReLU(),
-            nn.Linear(64, 64),
-            nn.ReLU(),
-            nn.Linear(64, 64),
-            nn.ReLU(),
-            nn.Linear(64, 1),
+            nn.Dropout(0.2),
+            nn.Linear(64, 1)
         )
 
     def forward(self, x):
