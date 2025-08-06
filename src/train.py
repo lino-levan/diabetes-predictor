@@ -55,11 +55,10 @@ def test_loop(dataloader):
         for result in dataloader:
             pred = model(result["features"])
             test_loss += loss_fn(pred, result["label"]).item()
-            # For regression, calculate accuracy as percentage within threshold
-            threshold = 0.5
+
             pred_flat = pred.squeeze()
             label_flat = result["label"].squeeze()
-            within_threshold = (torch.abs(pred_flat - label_flat) <= threshold).type(torch.float)
+            within_threshold = (torch.abs(pred_flat - label_flat) <= 0.5).type(torch.float) # 0.5 is okay as the threshold since input data is 50/50
             correct += within_threshold.sum().item()
 
     print(correct, size)
