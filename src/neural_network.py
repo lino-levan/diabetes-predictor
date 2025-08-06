@@ -4,15 +4,15 @@ class NeuralNetwork(nn.Module):
     def __init__(self):
         super().__init__()
         self.model = nn.Sequential(
-            nn.Linear(21, 256),
+            nn.Linear(21, 64),
             nn.ReLU(),
-            nn.Linear(256, 256),
+            nn.Linear(64, 64),
             nn.ReLU(),
-            nn.Linear(256, 256),
+            nn.Linear(64, 64),
             nn.ReLU(),
-            nn.Linear(256, 256),
+            nn.Linear(64, 64),
             nn.ReLU(),
-            nn.Linear(256, 64),
+            nn.Linear(64, 64),
             nn.ReLU(),
             nn.Linear(64, 1),
         )

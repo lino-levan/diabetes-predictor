@@ -7,7 +7,7 @@ from neural_network import NeuralNetwork
 
 learning_rate = 1e-4
 batch_size = 64
-epochs = 10
+epochs = 100
 
 test = DiabetesDataset("data/test.csv")
 test_dataloader = DataLoader(test, batch_size=batch_size)
@@ -25,7 +25,7 @@ print(train[0]["label"])
 print(example_feature)
 print(model(example_feature))
 
-loss_fn = nn.MSELoss()
+loss_fn = nn.BCEWithLogitsLoss()
 optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate)
 
 def train_loop(dataloader):
@@ -58,8 +58,8 @@ def test_loop(dataloader):
 
             pred_flat = pred.squeeze()
             label_flat = result["label"].squeeze()
-            within_threshold = (torch.abs(pred_flat - label_flat) <= 0.5).type(torch.float) # 0.5 is okay as the threshold since input data is 50/50
-            correct += within_threshold.sum().item()
+            pred_classes = (torch.sigmoid(pred_flat) >= 0.5).float()
+            correct += (pred_classes == label_flat).sum().item()
 
     print(correct, size)
     test_loss /= num_batches
